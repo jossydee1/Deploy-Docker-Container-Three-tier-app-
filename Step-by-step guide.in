@@ -1,0 +1,79 @@
+Step 1: Confirm your database's environment variable
+1. Open the backend directory
+2. open the .env file. You can edit the details to what you prefer or just use what is there exactly as it is
+
+
+Step 2: Prepare the prerequisite for the deployment of your Application on containers
+1. Create a Network: This network will allow communication among the three containers
+
+docker network create three-tier-network
+
+2. Confirm the network creation
+docker network ls
+
+3. Create a volume: This will help to retain the data in case the container fails
+docker volume create mysql-data
+
+4. Confirm volume creation
+docker volume ls
+
+Step 3. Create the docker images for each tier of the application (frontend, backend and database)
+Step 3.1: For database
+1. Create the database image. 
+To locate the docker code, go to the database directory and locate a file called Dockerfile
+Note:the details of the environment variable should match the details in  the .env file as stated in step 1 above.
+
+2. Build the image. 
+cd to the database directory on your terminal. Then run the code;
+docker build -t mysql-image .
+
+3. Run the image that you just created
+docker run --name mysql-container --network=three-tier-network -p 3306:3306 -v mysql-data:/var/lib/mysql -d mysql-image
+
+4. Check the container running
+docker ps
+docker container ls
+Note: The command above will display running containers ONLY. If you want to see all containsers, add the -a command
+That is: docker ps -a OR docker container ls -a
+
+Step 3.1.1: Go into the databse and create the tables
+1. Get into the MySQL docker container by running the Execute command
+docker exec -it <container_id or container_name> /bin/bash 
+
+2: Log in to the database using the details in the .env file in step 1
+mysql -u root -p 
+mysql123 (use whatever password you have in your .env file)
+
+3. Create the mysql tables
+Table name is school
+USE school;
+4. Create table rows
+CREATE TABLE student (id INT AUTO_INCREMENT PRIMARY KEY, name varchar(40), roll_number int, class varchar(16));
+CREATE TABLE teacher (id INT AUTO_INCREMENT PRIMARY KEY, name varchar(40), subject varchar(40), class varchar(16));
+
+Now, the database is ready to connect to the backend. Let's deploy our backend container.
+
+Step 3.2: For Backend
+1. Create the backend image. 
+To locate the docker code, go to the backend directory and locate a file called Dockerfile
+
+2. Build the image.
+cd to the backend directory on your terminal. Then run the code;
+docker build -t backend .
+
+3. Run the image that you just created
+docker run -d -p 3500:3500 --name backend-container --network=three-tier-network backend
+
+4. Verify that backend application is running through your browser
+localhost:3500
+
+Step 3.3: For frontend
+1. Create the frontend image. 
+To locate the docker code, go to the frontend directory and locate a file called Dockerfile
+
+2. Build the image.
+cd to the backend directory on your terminal. Then run the code;
+docker build -t frontend .
+
+3. Run the image that you just created
+docker run -d --name frontend-container --network=three-tier-network -p 80:80 frontend
