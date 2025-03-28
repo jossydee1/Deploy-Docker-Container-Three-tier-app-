@@ -77,3 +77,6 @@ docker build -t frontend .
 
 3. Run the image that you just created
 docker run -d --name frontend-container --network=three-tier-network -p 80:80 frontend
+
+4. Verify that frontend application is running through your browser
+localhost:80
