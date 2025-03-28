@@ -1,0 +1,41 @@
+### For Dockerfile
+## Create a network for all 3 containers to communicate
+docker network create three-tier-network
+
+## confirm the network
+docker network ls
+
+## Create a volume (for persistence)
+docker volume create mysql-data
+
+
+## Build the MySQL image & run the container
+docker build -t mysql-image .
+
+## Run the mysql container
+docker run --name mysql-container --network=three-tier-network -p 3306:3306 -v mysql-data:/var/lib/mysql -d mysql-image
+
+## Get into the MYSQL database
+docker exec -it <container_id/container_name> /bin/bash
+
+## enter your database details
+mysql -u root -p
+
+## Create Tables
+USE school;
+CREATE TABLE student (id INT AUTO_INCREMENT PRIMARY KEY, name varchar(40), roll_number int, class varchar(16));
+CREATE TABLE teacher (id INT AUTO_INCREMENT PRIMARY KEY, name varchar(40), subject varchar(40), class varchar(16));
+
+## Build the Backend image
+docker build -t backend .
+
+## Run the backend container
+docker run -p 3500:3500 --name backend-container — network=three-tier-network -d backend
+
+Go to localhost:3500 on your browser.
+
+## Build the frontend image
+docker build -t frontend .
+
+## Run the frontend container
+docker run -d — name frontend-container --network=three-tier-network -p 80:80 frontend
